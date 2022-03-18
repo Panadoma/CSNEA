@@ -2,8 +2,8 @@ import tkinter as tk
 import main
 from tkinter import ttk
 from tkinter import messagebox
-
-
+from idlelib.tooltip import Hovertip
+import re
 
 #Variables
 
@@ -29,6 +29,40 @@ def LiniarSearch(items, searchValue): #A general linar serach algorithm
             itemFound = True
         
     return itemFound  
+
+
+
+
+def BubbleSort(Values):
+    for i in range(len(Values)):
+        for j in range(len(Values) - 1):
+            if Values[j] > Values[j+1]:
+                Values[j], Values[j+1] = Values[j+1], Values[j]
+
+
+
+
+def CalculateNextPrimaryKey(Values):
+    nextNumber=0
+    BubbleSort(Values)
+    print(Values)
+    LastPrimaryKey = Values[len(Values)-1]
+    print("Last primary key is :"+str(LastPrimaryKey))
+
+    TheLetters = LastPrimaryKey[:2]
+    PrimaryKeyValue= LastPrimaryKey[2:] #remove the first two letters to get a number
+    if(PrimaryKeyValue.isdigit()):
+        nextNumber = int(PrimaryKeyValue)+1
+    else:
+        print("Check the file, there is problem with the format of its primary keys")
+
+    return (TheLetters + str(nextNumber))
+
+
+
+
+
+
 
 
 
@@ -250,17 +284,323 @@ def SHA256(TheValue):
 
 
 
+def ShowNewMemberForm():
+
+    
+
+    #Initiolize the AddNewAccount form
+    frmAddMember = tk.Tk()
+    frmAddMember.title("Add Users")
+    frmAddMember.geometry('400x350+50+50')
+    frmAddMember.resizable(False,False)
+    frmAddMember.configure(background='white')
+
+    MemberIDText = tk.StringVar()
+    NameText= tk.StringVar()
+    EmailText= tk.StringVar()
+    PhonnumberText= tk.StringVar()
+    SurnameText= tk.StringVar()
+    DOBText= tk.StringVar()
+    MembershipText= tk.StringVar()
+    ExtraInfoText= tk.StringVar()
+   
+   
+
+
+    #Initiolize the defult values
+
+    MembershipText.set("Gold") # default value
+
+     
+
+
+
+
+
+
+
+
+
+
+            
+
+
+
+    #############THE UI WIGETS####
+    #The Frame#
+    frame = tk.Frame(frmAddMember,bg='white')
+    frame.place(x=30,y=55)
+
+
+
+
+        #Lables######
+    lblMemberID= ttk.Label(
+        frame,
+        text='MemberID',
+        background='white'
+    )
+
+    lblName= ttk.Label(
+        frame,
+        text='Name',
+        padding=0,
+        background='white'
+    )
+
+    lblSurname= ttk.Label(
+        frame,
+        text='Surname',
+        background='white'
+        )
+    lblDOB= ttk.Label(
+        frame,
+        text='DOB (dd/mm/yy)',
+        background='white'
+        )
+
+
+    lblMembershipID= ttk.Label(
+        frame,
+        text='Membership Type',
+        background='white'
+        )
+
+
+    lblEmail= ttk.Label(
+        frame,
+        text='Email',
+        background='white'
+        )
+
+    lblPhonnumber= ttk.Label(
+        frame,
+        text='Phone Number',
+        background='white'
+        )
+
+    lblExtraInfo= ttk.Label(
+        frame,
+        text='Extra Info',
+        background='white'
+        )
+
+
+        ###Textboxes
+    txtMemberID = tk.Entry(frame,textvariable= MemberIDText)
+    txtName=tk.Entry(frame, textvariable= NameText)
+    txtSurname=tk.Entry(frame, textvariable= SurnameText)
+    txtDOB=tk.Entry(frame, textvariable=DOBText)
+    txtEmail=tk.Entry(frame, textvariable= EmailText)
+    txtPhonenumber=tk.Entry(frame, textvariable=PhonnumberText)
+    txtMembershipID=tk.Entry(frame, textvariable= MembershipText)
+    txtExtraInfo=tk.Entry(frame, textvariable= ExtraInfoText)
+
+
+
+    #ComboBOX (drop down menu)
+    cmbMembership = tk.OptionMenu(frame, MembershipText, "Gold", "Silver", "Bronz")
+
+
+
+
+
+    #Calculate the next primary key
+    def NextPK():
+        file = open("programData/Members.txt")
+        lines = file.read().splitlines()  #Load lines into an array
+        primaryKeys= []
+        for i in lines:
+            tmp=i.split(',') #Split each line into its elemnts seperated by commas. 
+            print(tmp)
+            primaryKeys.append(tmp[0])
+
+            
+        print("Primary keys are: "+str(primaryKeys))
+        file.close()
+        MemberIDText.set(CalculateNextPrimaryKey(primaryKeys))#Calculate the Next Primary key using its function
+        print("MemberIDText set to "+str(CalculateNextPrimaryKey(primaryKeys)))
+
+
+
+
+    NextPK()#Call the next primary key function
+            
+    
+
+
+    
+
+
+    def BackHome():
+        frmAddMember.destroy()
+        ShowMainForm()
+
+
+
+
+
+    def AddMember():
+
+
+        MemberIDString = txtMemberID.get()
+        NameString=txtName.get()
+        SurnameString=txtSurname.get()
+        EmailString=txtEmail.get()
+        PhonenumberString=txtPhonenumber.get()
+        DOBString=txtDOB.get()
+        MembershipString=txtMembershipID.get()
+
+        #revert the colours in case they have been changed
+        ExtraInfoString=txtExtraInfo.get()        
+        txtMemberID.configure(bg="white")
+        txtPhonenumber.configure(bg='white')
+        txtName.configure(bg='white')
+        txtSurname.configure(bg='white')
+        txtEmail.configure(bg='white')
+        txtExtraInfo.configure(bg='white')
+        txtDOB.configure(bg='white')
+
+
+#####################Validation##############################################################33
+        ValidationPassed= True
+
+        #Length checks
+        if len(NameString)>25 or len(NameString)<3:
+            ValidationPassed=False
+            print("Name length check not passed")
+            txtName.configure(bg='pink')
+        
+        if len(SurnameString)>25 or len(SurnameString)<3:
+            ValidationPassed=False
+ 
+            print("Email type check not passed")
+            txtSurname.configure(bg='pink')
+        #DOB
+        DOBEx =re.compile('^[0-3][0-9][/][0-1][0-9][/][0-9][0-9]$')
+        if not re.fullmatch(DOBEx,DOBString):
+            ValidationPassed=False
+            txtDOB.configure(bg='pink')
+
+
+
+
+        #Type checks
+
+        #phone number
+        tmp=  PhonenumberString
+        if not tmp.isdigit():
+            ValidationPassed=False
+            print("Is digit not passed")
+            txtPhonenumber.configure(bg='pink')
+            
+
+
+
+
+        
+
+            
+            
+
+ ###############Write to file#################       
+
+        if ValidationPassed:
+           with open('programData/Members.txt', 'a') as file: 
+               file.write(MemberIDString+","+NameString+","+SurnameString+","+EmailString+','+PhonenumberString+","+DOBString+","+MembershipString+","+txtExtraInfo.get()+"\n") 
+  
+           #Reload everything for the next adding of a record
+           MemberIDText.set("")
+           NameText.set("")
+           EmailText.set("")
+           PhonnumberText.set("")
+           SurnameText.set("")
+           DOBText.set("")
+           MembershipText.set("Gold")
+           ExtraInfoText.set("")
+           NextPK()#Load the next default primary key
+
+           messagebox.showinfo("Success", "The new member has been added!")
+        else:
+            messagebox.showerror("Error", "Please make sure all the entries are valid")
+        
+        
+
+
+    
+    ###Add button####
+    btnAddNewMember = ttk.Button(
+        frame,
+        text='Add',
+        command= AddMember
+    )
+    btnHome = ttk.Button(
+        frame,
+        text='Home',
+        command= BackHome
+    )
+
+
+
+    #Caclutate the date and display it as default
+
+    #Calutlate the next MemberID
+
+    #Calculate the next 
+
+    #Grid and placements
+
+    lblMemberID.grid(column=0,row=1,padx=7,sticky='W')
+    txtMemberID.grid(column=2,row=1)
+    lblName.grid(column=0,row=2,pady=4,padx=7,sticky='W')
+    txtName.grid(column=2,row=2,pady=4)
+    lblSurname.grid(column=0,row=3,pady=4,padx=7,sticky='W')
+    txtSurname.grid(column=2,row=3,pady=4)
+    lblEmail.grid(column=0,row=4,pady=4,padx=7,sticky='W')
+    txtEmail.grid(column=2,row=4,pady=4)
+    lblPhonnumber.grid(column=0,row=5,pady=4,padx=7,sticky='W')
+    txtPhonenumber.grid(column=2,row=5,pady=4)
+    lblDOB.grid(column=0,row=6,pady=4,padx=7,sticky='W')
+    txtDOB.grid(column=2,row=6,pady=4)
+    lblMembershipID.grid(column=0,row=7,pady=4,padx=7,sticky='W')
+    cmbMembership.grid(column=2,row=7,pady=4)
+    lblExtraInfo.grid(column=0,row=8,pady=4,padx=7,sticky='W')
+    txtExtraInfo.grid(column=2,row=8,pady=4)
+    btnAddNewMember.grid(column=2,row=9,pady=15)
+    btnHome.grid(column=1,row=9,pady=15)
+
+
+
+
+
+    frmAddMember.mainloop()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 def ShowMainForm():
 
-    #Initiolize the AddNewAccount form
-    frmAddAccount =tk.Tk()
-    frmAddAccount.title("Main Menu")
-    frmAddAccount.geometry('280x140+50+50')
-    frmAddAccount.resizable(False,False)
-    frmAddAccount.configure(background='white')
-
+    #Initiolize the form
+    frm =tk.Tk()
+    frm.title("Main Menu")
+    frm.geometry('280x140+50+50')
+    frm.resizable(False,False)
+    frm.configure(background='white')
     
     Usernametext = tk.StringVar()
     PasswordText= tk.StringVar()
@@ -290,9 +630,11 @@ def ShowMainForm():
     def NewStaff():
         a=0
     def NewMember():
-        a=0
+
+        frm.destroy()
+        ShowNewMemberForm()
     def NewRecord():
-        a=0
+        ShowAddRecordForm()
     def SrchStaff():
         a=0
     def SrchMember():
@@ -304,7 +646,7 @@ def ShowMainForm():
 
     #############THE UI WIGETS####
     #The Frame#
-    frame = tk.Frame(frmAddAccount,bg='white')
+    frame = tk.Frame(frm,bg='white')
     frame.place(x=10,y=10)
     #The buttons
     btnNewAccount = ttk.Button(
@@ -338,7 +680,7 @@ def ShowMainForm():
     )
 
 
-
+    
 
 
 
@@ -368,7 +710,17 @@ def ShowMainForm():
     )
 
 
+    
+    #Tool tips
+    myTip = Hovertip(btnNewAccount,'Add a new account')
+    myTip2 = Hovertip(btnNewStaff,'Add a new member of staff')
+    myTip3 = Hovertip(btnNewRecord,'Add a new record')
+    myTip4 = Hovertip(btnNewMember,'Add a member')
+    myTip5 = Hovertip(btnSearchStaff,'Browse the staff')
+    myTip6 = Hovertip(btnSearchRecord,'Browse the records')
+    myTip7 = Hovertip(btnSearchMember,'Brorwse the members')
 
+  
 
     btnNewAccount.grid(column=2,row=1,pady=2,padx=2)
     btnNewStaff.grid(column=3,row=1,pady=2,padx=2)
@@ -385,7 +737,454 @@ def ShowMainForm():
 
 
 
-    frmAddAccount.mainloop()
+    frm.mainloop()
+
+
+
+
+
+
+
+
+def ShowNewMemberForm():
+
+    
+
+    #Initiolize the AddNewAccount form
+    frmAddMember = tk.Tk()
+    frmAddMember.title("Add Users")
+    frmAddMember.geometry('400x350+50+50')
+    frmAddMember.resizable(False,False)
+    frmAddMember.configure(background='white')
+
+    MemberIDText = tk.StringVar()
+    NameText= tk.StringVar()
+    EmailText= tk.StringVar()
+    PhonnumberText= tk.StringVar()
+    SurnameText= tk.StringVar()
+    DOBText= tk.StringVar()
+    MembershipText= tk.StringVar()
+    ExtraInfoText= tk.StringVar()
+   
+   
+
+
+    #Initiolize the defult values
+
+    MembershipText.set("Gold") # default value
+
+     
+
+
+
+
+
+
+
+
+
+
+            
+
+
+
+    #############THE UI WIGETS####
+    #The Frame#
+    frame = tk.Frame(frmAddMember,bg='white')
+    frame.place(x=60,y=55)
+
+
+
+
+        #Lables######
+    lblMemberID= ttk.Label(
+        frame,
+        text='MemberID',
+        background='white'
+    )
+
+    lblName= ttk.Label(
+        frame,
+        text='Name',
+        padding=0,
+        background='white'
+    )
+
+    lblSurname= ttk.Label(
+        frame,
+        text='Surname',
+        background='white'
+        )
+    lblDOB= ttk.Label(
+        frame,
+        text='DOB (dd/mm/yy)',
+        background='white'
+        )
+
+
+    lblMembershipID= ttk.Label(
+        frame,
+        text='Membership Type',
+        background='white'
+        )
+
+
+    lblEmail= ttk.Label(
+        frame,
+        text='Email',
+        background='white'
+        )
+
+    lblPhonnumber= ttk.Label(
+        frame,
+        text='Phone Number',
+        background='white'
+        )
+
+    lblExtraInfo= ttk.Label(
+        frame,
+        text='Extra Info',
+        background='white'
+        )
+
+
+        ###Textboxes
+    txtMemberID = tk.Entry(frame,textvariable= MemberIDText)
+    txtName=tk.Entry(frame, textvariable= NameText)
+    txtSurname=tk.Entry(frame, textvariable= SurnameText)
+    txtDOB=tk.Entry(frame, textvariable=DOBText)
+    txtEmail=tk.Entry(frame, textvariable= EmailText)
+    txtPhonenumber=tk.Entry(frame, textvariable=PhonnumberText)
+    txtMembershipID=tk.Entry(frame, textvariable= MembershipText)
+    txtExtraInfo=tk.Entry(frame, textvariable= ExtraInfoText)
+
+
+
+    #ComboBOX (drop down menu)
+    cmbMembership = tk.OptionMenu(frame, MembershipText, "Gold", "Silver", "Bronz")
+
+
+
+
+
+    #Calculate the next primary key
+    def NextPK():
+        file = open("programData/Members.txt")
+        lines = file.read().splitlines()  #Load lines into an array
+        primaryKeys= []
+        for i in lines:
+            tmp=i.split(',') #Split each line into its elemnts seperated by commas. 
+            print(tmp)
+            primaryKeys.append(tmp[0])
+
+            
+        print("Primary keys are: "+str(primaryKeys))
+        file.close()
+        MemberIDText.set(CalculateNextPrimaryKey(primaryKeys))#Calculate the Next Primary key using its function
+        print("MemberIDText set to "+str(CalculateNextPrimaryKey(primaryKeys)))
+
+
+
+
+    NextPK()#Call the next primary key function
+            
+    
+
+
+    
+
+
+
+
+
+
+
+    def AddMember():
+
+
+        MemberIDString = txtMemberID.get()
+        NameString=txtName.get()
+        SurnameString=txtSurname.get()
+        EmailString=txtEmail.get()
+        PhonenumberString=txtPhonenumber.get()
+        DOBString=txtDOB.get()
+        MembershipString=txtMembershipID.get()
+
+        #revert the colours in case they have been changed
+        ExtraInfoString=txtExtraInfo.get()        
+        txtMemberID.configure(bg="white")
+        txtPhonenumber.configure(bg='white')
+        txtName.configure(bg='white')
+        txtSurname.configure(bg='white')
+        txtEmail.configure(bg='white')
+        txtExtraInfo.configure(bg='white')
+        txtDOB.configure(bg='white')
+
+
+#####################Validation##############################################################33
+        ValidationPassed= True
+
+        #Length checks
+        if len(NameString)>25 or len(NameString)<3:
+            ValidationPassed=False
+            print("Name length check not passed")
+            txtName.configure(bg='pink')
+        
+        if len(SurnameString)>25 or len(SurnameString)<3:
+            ValidationPassed=False
+ 
+            print("Email type check not passed")
+            txtEmail.configure(bg='pink')
+        #DOB
+        DOBEx =re.compile('^[0-3][0-9][/][0-1][0-9][/][0-9][0-9]$')
+        if not re.fullmatch(DOBEx,DOBString):
+            ValidationPassed=False
+            txtDOB.configure(bg='pink')
+
+
+
+
+        #Type checks
+
+        #phone number
+        tmp=  PhonenumberString
+        if not tmp.isdigit():
+            ValidationPassed=False
+            print("Is digit not passed")
+            txtPhonenumber.configure(bg='pink')
+            
+
+
+
+
+        
+
+            
+            
+
+ ###############Write to file#################       
+
+        if ValidationPassed:
+           with open('programData/Members.txt', 'a') as file: 
+               file.write(MemberIDString+","+NameString+","+SurnameString+","+EmailString+','+PhonenumberString+","+DOBString+","+MembershipString+","+txtExtraInfo.get()+"\n") 
+  
+           #Reload everything for the next adding of a record
+           MemberIDText.set("")
+           NameText.set("")
+           EmailText.set("")
+           PhonnumberText.set("")
+           SurnameText.set("")
+           DOBText.set("")
+           MembershipText.set("Gold")
+           ExtraInfoText.set("")
+           NextPK()#Load the next default primary key
+
+           messagebox.showinfo("Success", "The new member has been added!")
+        else:
+            messagebox.showerror("Error", "Please make sure all the entries are valid")
+        
+        
+
+
+    
+    ###Add button####
+    btnAddNewMember = ttk.Button(
+        frame,
+        text='Add',
+        command= AddMember
+    )
+
+
+    #Caclutate the date and display it as default
+
+    #Calutlate the next MemberID
+
+    #Calculate the next 
+
+    #Grid and placements
+
+    lblMemberID.grid(column=0,row=1,padx=7,sticky='W')
+    txtMemberID.grid(column=2,row=1)
+    lblName.grid(column=0,row=2,pady=4,padx=7,sticky='W')
+    txtName.grid(column=2,row=2,pady=4)
+    lblSurname.grid(column=0,row=3,pady=4,padx=7,sticky='W')
+    txtSurname.grid(column=2,row=3,pady=4)
+    lblEmail.grid(column=0,row=4,pady=4,padx=7,sticky='W')
+    txtEmail.grid(column=2,row=4,pady=4)
+    lblPhonnumber.grid(column=0,row=5,pady=4,padx=7,sticky='W')
+    txtPhonenumber.grid(column=2,row=5,pady=4)
+    lblDOB.grid(column=0,row=6,pady=4,padx=7,sticky='W')
+    txtDOB.grid(column=2,row=6,pady=4)
+    lblMembershipID.grid(column=0,row=7,pady=4,padx=7,sticky='W')
+    cmbMembership.grid(column=2,row=7,pady=4)
+    lblExtraInfo.grid(column=0,row=8,pady=4,padx=7,sticky='W')
+    txtExtraInfo.grid(column=2,row=8,pady=4)
+    btnAddNewMember.grid(column=2,row=9,pady=10)
+
+
+
+
+    frmAddMember.mainloop()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def ShowAddRecordForm():
+
+    
+
+    #Initiolize the AddNewAccount form
+    frmAddRecord = tk.Tk()
+    frmAddRecord.title("Add Users")
+    frmAddRecord.geometry('400x250+50+50')
+    frmAddRecord.resizable(False,False)
+    frmAddRecord.configure(background='white')
+
+    RecordIDText = tk.StringVar()
+    DateText= tk.StringVar()
+    MemberIDText= tk.StringVar()
+    ActivityIDText= tk.StringVar()
+   
+
+
+    #Initiolize the defult values
+
+    ActivityIDText.set("Gym") # default value
+
+
+    
+
+
+
+
+
+    def AddRecord():
+        
+        #j
+
+        #Validatin, add the split
+        ValidationPassed= True
+
+        
+
+        if ValidationPassed:
+            p=1
+        
+        
+
+
+
+
+
+
+            
+
+
+
+    #############THE UI WIGETS####
+    #The Frame#
+    frame = tk.Frame(frmAddRecord,bg='white')
+    frame.place(x=60,y=55)
+
+
+    #Lables######
+    lblRecordID= ttk.Label(
+        frame,
+        text='RecordID',
+        background='white'
+    )
+
+    lblDate= ttk.Label(
+        frame,
+        text='Date',
+        padding=0,
+        background='white'
+    )
+
+    lblMemberID= ttk.Label(
+        frame,
+        text='MemberID',
+        background='white'
+        ) 
+    lblActivity= ttk.Label(
+        frame,
+        text='Activity Type',
+        background='white'
+        )
+
+    ###Textboxes
+    txtRecordID = tk.Entry(frame,textvariable=RecordIDText)
+    txtDate=tk.Entry(frame, textvariable=DateText)
+    txtMemberID=tk.Entry(frame, textvariable=MemberIDText)
+    txtActivityID=tk.Entry(frame, textvariable=ActivityIDText)
+
+    ###Add button####
+    btnAddNewRecord = ttk.Button(
+        frame,
+        text='Add',
+        command= AddRecord
+    )
+    cmbActivityID = tk.OptionMenu(frame, ActivityIDText, "Gym", "Swimming pool", "tenis")
+
+
+    #Caclutate the date and display it as default
+
+    #Calutlate the next RecordID
+
+    #Calculate the next 
+
+    #Grid and placements
+    lblRecordID.grid(column=0,row=1,padx=7,sticky='W')
+    txtRecordID.grid(column=2,row=1)
+    lblDate.grid(column=0,row=2,pady=4,padx=7,sticky='W')
+    txtDate.grid(column=2,row=2,pady=4)
+    lblMemberID.grid(column=0,row=3,pady=4,padx=7,sticky='W')
+    txtMemberID.grid(column=2,row=3,pady=4)
+    lblActivity.grid(column=0,row=4,pady=4,padx=7,sticky='W')
+   # txtActivityID.grid(column=2,row=4,pady=4)
+    cmbActivityID.grid(column=2,row=4,pady=4) 
+    btnAddNewRecord.grid(column=2,row=6,pady=25,columnspan=1)
+
+
+
+
+    frmAddRecord.mainloop()
+
+
+
+
+
+
+
 
 
 
@@ -414,33 +1213,57 @@ def ShowAddUserForm():
 
 
         #Validation
-        validationPassed= True
+
+        validationPassed=True
+        #length check: 4<x<25; 
+        if len(txtAddPassword.get() )>25 or len(txtAddPassword.get() )<=3 or  len(txtAddUsername.get())<=3 or  len( txtAddUsername.get())<=3:
+            validationPassed=False  
+            messagebox.showerror("Error", "Your username and password have to meet the valid length")
+
+        #Type check: see if it contains any spaces ---> " "
+        if (' ' in txtAddPassword.get()) == True or (' ' in txtAddUsername.get()) == True:
+            validationPassed=False  
+            messagebox.showerror("Error", "Spaces are not allowed")
+
+        #Do the Passwords match
+        if not(txtAddPassword.get() == txtRAddPassword.get()): 
+            messagebox.showerror("Error", "Passwords do not match") 
+            validationPassed=False  
 
 
-        
+            
+
+
         
 
         if validationPassed:
             #Salt the username and password, then hash it
-            SaltedPassword = Usernametext.get() + PasswordText.get()
+            SaltedPassword = txtAddUsername.get()+ txtAddPassword.get() 
+            print("salted password is:"+str(SaltedPassword ))
             HashedPassword= SHA256(SaltedPassword)
+
+            print("Validation Passed")
+            frmAddAccount.destroy()
             
 
-            #Check if the user already exists
+    
 
 
 
-            IsNewUser = True
-            if IsNewUser:
-                with open('programData/HashedPasswords.txt', 'a') as file:
-                    HashedPassword=HashedPassword + '\n'
-                    file.write(HashedPassword)
 
-
-        else:
-
-            tkMessageBox.showerror("Error","Please Enter a valid username and password")
                 
+            with open('programData/HashedPasswords.txt', 'a') as file:
+                HashedPassword=HashedPassword + '\n'
+                file.write(HashedPassword)
+                
+                print("Password added ")
+            
+
+                messagebox.showinfo("Success", "New username and password has been added")
+
+
+
+
 
 
 
@@ -561,29 +1384,31 @@ def ShowLoginForm():
         enteredPassword = txtPassword.get()     
         enteredUsername = txtUsername.get() 
         
-        #Validating Username and password
+        #############Validating Username and password
+
+
         validationPassed= True
         loginSuccess= False
 
+        #length check: 4<x<25; 
+        if len(enteredUsername)>25 or len(enteredUsername)<=3 or  len(enteredPassword)<=3 or  len(enteredPassword)<=3:
+            validationPassed=False  
+            messagebox.showerror("Error", "Your username or password does not contain the valid length")
 
-        if enteredPassword =="" or enteredUsername=="": #Presence Check
-            validationPassed =False
-        if (len(enteredPassword)>25)  or (int(len(enteredUsername)>25)):  #Length Check
-            validationPassed= False
-
-
-        #print(len(enteredPassword))
-
-        #Type check
-        #load characters into an array
-        theUsrCharacters =[]
-        for character in enteredUsername:
-            theUsrCharacters.append(character)
-        #check if any unallowed symbol is in the username
-        validationPassed = not(LiniarSearch(theUsrCharacters,"*") or LiniarSearch(theUsrCharacters,"#") or LiniarSearch(theUsrCharacters,"+") or LiniarSearch(theUsrCharacters,"-") or  LiniarSearch(theUsrCharacters,"&") or LiniarSearch(theUsrCharacters,"!") or LiniarSearch(theUsrCharacters,"<") or LiniarSearch(theUsrCharacters,">") or LiniarSearch(theUsrCharacters,"|")) 
+        #Type check: see if it contains any spaces ---> " "
+        if (' ' in enteredPassword) == True or (' ' in enteredUsername) == True:
+            validationPassed=False  
+            messagebox.showerror("Error", "Spaces are not allowed. Please entere a valid username or password")
 
 
 
+        
+        
+
+
+
+
+        #Attempt login
         if validationPassed:
             file = open("programData/HashedPasswords.txt")
             HashedPasswords = file.read().splitlines()  #Load lines into an array
@@ -595,8 +1420,6 @@ def ShowLoginForm():
             loginSuccess= LiniarSearch(HashedPasswords, HashedUsrPwd)#perfrom a liniar serach in order to find the matching password
 
 
-        else:
-            messagebox.showerror("Error", "Please enter a valid username and password")
 
 
 
@@ -610,6 +1433,8 @@ def ShowLoginForm():
             ShowMainForm()
         else:
             print("login Unsuccessful")
+            messagebox.showwarning("Failed", "Please entere a valid username or password")
+
 
         
 
@@ -656,7 +1481,5 @@ def ShowLoginForm():
 
 
 
-#print(SHA256("Your mom"))
 ShowLoginForm()
-
-#ShowMainForm()
+#ShowNewMemberForm()
