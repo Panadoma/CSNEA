@@ -1,5 +1,4 @@
 import tkinter as tk   
-import main
 from tkinter import ttk
 from tkinter import messagebox
 from idlelib.tooltip import Hovertip
@@ -495,7 +494,7 @@ def ShowAddRecordForm():
         ) 
     lblActivity= ttk.Label(
         frame,
-        text='ActivityMember',  
+        text='Activity',  
         background='white'
         )
 
@@ -1664,6 +1663,373 @@ def ShowNewMemberForm():
 
 
 
+#  _____ _                     _____ _                          ______                   
+# /  ___| |                   /  __ \ |                         |  ___|                  
+# \ `--.| |__   _____      __ | /  \/ | __ _ ___ ___  ___  ___  | |_ ___  _ __ _ __ ___  
+#  `--. \ '_ \ / _ \ \ /\ / / | |   | |/ _` / __/ __|/ _ \/ __| |  _/ _ \| '__| '_ ` _ \ 
+# /\__/ / | | | (_) \ V  V /  | \__/\ | (_| \__ \__ \  __/\__ \ | || (_) | |  | |            \____/|_| |_|\___/ \_/\_/    \____/_|\__,_|___/___/\___||___/ \_| \___/|_|  |_| |_| |_,                                                                                               
+#                                                                                                 
+
+
+
+
+
+
+def ShowClassesForm():
+
+
+  #Initiolize the AddNewClasses form
+    frmAddClass = tk.Tk()
+    frmAddClass.title("Add new Classes")
+    frmAddClass.geometry('400x320+50+50')
+    frmAddClass.resizable(False,False)
+    frmAddClass.configure(background='white')
+    #Definet he StringVars
+    ClassIDText = tk.StringVar()
+    TitleText = tk.StringVar()
+    DateText= tk.StringVar()
+    StaffIDText= tk.StringVar()
+   
+
+
+
+        #Today's date
+    today = datetime.datetime.now()
+    DateText.set(today.strftime("%x"))
+
+
+
+    #############THE UI WIGETS########
+
+         #The Frame#
+    frame = tk.Frame(frmAddClass,bg='white')
+    frame.place(x=60,y=55)
+
+
+         #Lables######
+    lblClassID= ttk.Label(
+        frame,
+        text='ClassID',
+        background='white'
+    )
+
+    lblTitle= ttk.Label(
+        frame,
+        text='Title',
+        background='white'
+    )
+    lblDate= ttk.Label(
+        frame,
+        text='Date',
+        padding=0,
+        background='white'
+    )
+
+    lblStaffID= ttk.Label(
+        frame,
+        text='Teacher',
+        background='white'
+        ) 
+
+          ###eextboxes
+    txtClassID = tk.Entry(frame,textvariable=ClassIDText)
+    txtTitle = tk.Entry(frame,textvariable=TitleText)
+    txtDate=tk.Entry(frame, textvariable=DateText)
+    txtStaffID=tk.Entry(frame, textvariable=StaffIDText)
+        
+####Load the the defult primary key
+    primaryKeys=LoadFileIntoArray("programData/Classes.txt",0)
+    ClassIDText.set(CalculateNextPrimaryKey(primaryKeys))#Calculate the Next Primary key using its function
+    print(CalculateNextPrimaryKey(primaryKeys))
+
+
+
+
+    def BackHome():
+        frmAddClass.destroy()
+        ShowMainForm()
+
+#When the add record button is pressed ......
+    def AddClass():
+
+        
+        #Load the Strings
+        ClassIDString= txtClassID.get()
+        TitleString= txtClassID.get()
+        StaffIDString= txtStaffID.get()
+        DateString=txtDate.get()
+
+        
+        #######Validate the inputs#####
+        ValidationPassed= True
+
+
+         
+        #Format check: RecirdID in the form --> RC10000
+        IDEx = re.compile('^[C][L][0-9]{5}$')
+        if not re.fullmatch(IDEx,ClassIDString): 
+            ValidationPassed=False 
+            print("ID check not passed")
+            txtClassID.configure(bg='pink')
+        
+
+        if ValidationPassed:
+
+                #Write to file
+            with open('programData/Classes.txt', 'a') as file: 
+               file.write(ClassIDString+","+TitleString+","+DateString+","+StaffIDString+","+"\n") 
+
+                 #Reload everything for the next adding of a record
+            StaffIDText.set("")
+            TitleText.set("")
+                        #Calculate the next primary key
+            primaryKeys=LoadFileIntoArray("programData/Classes.txt",0)
+            ClassIDText.set(CalculateNextPrimaryKey(primaryKeys))#Calculate the Next Primary key using its function
+            print(CalculateNextPrimaryKey(primaryKeys))
+          
+
+
+        
+
+            messagebox.showinfo("Success", "New Class Has been added")
+
+        else:
+            messagebox.showerror("Error", "Please make sure all the entries are valid")
+
+
+
+
+        
+
+    ###Add the buttons####
+    btnAddNewClass = ttk.Button(
+        frame,
+        text='Add',
+        command= AddClass
+    )
+    btnHome= ttk.Button(
+        frame,
+        text='Home',
+        command= BackHome
+    )
+
+
+
+
+
+
+        #Load the primary keys of the staffs into the combobox
+    StaffPrimaryKeys=LoadFileIntoArray("programData/Staff.txt",0)
+    cmbStaffID=tk.OptionMenu(frame,StaffIDText,*StaffPrimaryKeys)
+
+    #Grid and placements
+    lblClassID.grid(column=0,row=1,padx=7,sticky='W')
+    txtClassID.grid(column=2,row=1)
+    lblTitle.grid(column=0,row=2,padx=7,sticky='W')
+    txtTitle.grid(column=2,row=2,pady=4)
+    lblDate.grid(column=0,row=3,pady=4,padx=7,sticky='W')
+    txtDate.grid(column=2,row=3,pady=4)
+    lblStaffID.grid(column=0,row=4,pady=4,padx=7,sticky='W')
+    cmbStaffID.grid(column=2,row=4,pady=4)
+    btnAddNewClass.grid(column=2,row=6,pady=25,columnspan=1)
+    btnHome.grid(column=1,row=6,pady=25,columnspan=1)
+
+
+
+    #Show the form
+    frmAddClass.mainloop()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#
+#     ____  _                     _____       _                _____                    
+#    / ___|| |__   _____      __ | ____|_ __ | |_ _ __ _   _  |  ___|__  _ __ _ __ ___  
+#    \___ \| '_ \ / _ \ \ /\ / / |  _| | '_ \| __| '__| | | | | |_ / _ \| '__| '_ ` _ \ 
+#     ___) | | | | (_) \ V  V /  | |___| | | | |_| |  | |_| | |  _| (_) | |  | | | | | |
+#    |____/|_| |_|\___/ \_/\_/   |_____|_| |_|\__|_|   \__, | |_|  \___/|_|  |_| |_| |_|
+#                                                          |___/                
+#
+def ShowEntryForm():
+    #Initiolize the AddNewAccount form
+    frmAddMemberToClass = tk.Tk()
+    frmAddMemberToClass.title("Add Users")
+    frmAddMemberToClass.geometry('400x250+50+50')
+    frmAddMemberToClass.resizable(False,False)
+    frmAddMemberToClass.configure(background='white')
+    #Definet he StringVars
+    EntryIDText = tk.StringVar()
+    MemberIDText= tk.StringVar()
+    ClassIDText= tk.StringVar()
+   
+
+
+
+
+    #############THE UI WIGETS########
+
+         #The Frame#
+    frame = tk.Frame(frmAddMemberToClass,bg='white')
+    frame.place(x=60,y=55)
+
+
+         #Lables######
+    lblEntryID= ttk.Label(
+        frame,
+        text='EntryID',
+        background='white'
+    )
+
+    lblClassID= ttk.Label(
+        frame,
+        text='ClassID',
+        background='white'
+    )
+    lblMemberID= ttk.Label(
+        frame,
+        text='MemberID',
+        background='white'
+        ) 
+          
+
+    ###Textboxes
+    txtEntryID = tk.Entry(frame,textvariable=EntryIDText)
+    txtMemberID=tk.Entry(frame, textvariable=MemberIDText)
+    txtClassID=tk.Entry(frame, textvariable=ClassIDText)
+        
+####Load the the defult primary key
+    primaryKeys=LoadFileIntoArray("programData/MemberToClass.txt",0)
+    EntryIDText.set(CalculateNextPrimaryKey(primaryKeys))#Calculate the Next Primary key using its function
+    print(CalculateNextPrimaryKey(primaryKeys))
+
+
+    def BackHome():
+        frmAddMemberToClass.destroy()
+        ShowMainForm()
+
+
+
+#When the add record button is pressed ......
+    def AddEntry():
+
+        
+        #Load the Strings
+        EntryIDString= txtEntryID.get()
+        MemberIDString= txtMemberID.get()
+        ClassIDString= txtClassID.get()
+
+        
+        #######Validate the inputs#####
+        ValidationPassed= True
+
+
+         
+        #Format check: RecirdID in the form --> RC10000
+        IDEx = re.compile('^[E][N][0-9]{5}$')
+        if not re.fullmatch(IDEx,EntryIDString): 
+            ValidationPassed=False 
+            print("ID check not passed")
+            txtEntryID.configure(bg='pink')
+        
+
+        if ValidationPassed:
+
+                #Write to file
+            with open('programData/MemberToClass.txt', 'a') as file: 
+               file.write(EntryIDString+","+ClassIDString+","+MemberIDString+"\n") 
+
+                 #Reload everything for the next adding of a record
+            MemberIDText.set("")
+                        #Calculate the next primary key
+            primaryKeys=LoadFileIntoArray("programData/MemberToClass.txt",0)
+            EntryIDText.set(CalculateNextPrimaryKey(primaryKeys))#Calculate the Next Primary key using its function
+            print(CalculateNextPrimaryKey(primaryKeys))
+          
+
+
+        
+
+            messagebox.showinfo("Success", "New Entry Has been added")
+
+        else:
+            messagebox.showerror("Error", "Please make sure all the entries are valid")
+
+
+
+
+        
+
+    ###Add the buttons####
+    btnAddNewRecord = ttk.Button(
+        frame,
+        text='Add',
+        command= AddEntry
+    )
+    btnHome= ttk.Button(
+        frame,
+        text='Home',
+        command= BackHome
+    )
+
+
+
+
+
+
+        #Load the primary keys of the members into the combobox
+    MemberPrimaryKeys=LoadFileIntoArray("programData/Members.txt",0)
+    cmbMemberID=tk.OptionMenu(frame,MemberIDText,*MemberPrimaryKeys)
+
+
+        #Load the primary keys of the classes into the combobox
+    ClassesPrimaryKeys=LoadFileIntoArray("programData/Classes.txt",0)
+    cmbClassID=tk.OptionMenu(frame,ClassIDText,*ClassesPrimaryKeys)
+
+    #Grid and placements
+    lblEntryID.grid(column=0,row=1,padx=7,sticky='W')
+    txtEntryID.grid(column=2,row=1)
+    lblMemberID.grid(column=0,row=3,pady=4,padx=7,sticky='W')
+    cmbMemberID.grid(column=2,row=3,pady=4)
+    lblClassID.grid(column=0,row=4,pady=4,padx=7,sticky='W')
+    cmbClassID.grid(column=2,row=4,pady=4)
+    btnAddNewRecord.grid(column=2,row=6,pady=25,columnspan=1)
+    btnHome.grid(column=1,row=6,pady=25,columnspan=1)
+
+
+
+    #Show the form
+    frmAddMemberToClass.mainloop()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1705,6 +2071,8 @@ def ShowMainForm():
     memberAdd48 = tk.PhotoImage(file='./UIelements/MembersAdd48.png')
     recordAdd48 = tk.PhotoImage(file='./UIelements/folderAdd48')
     Searching= tk.PhotoImage(file='./UIelements/Search.png') 
+    Entryimg= tk.PhotoImage(file='./UIelements/Entry.png') 
+    Classimg= tk.PhotoImage(file='./UIelements/Classes.png') 
     
     
     
@@ -1728,7 +2096,13 @@ def ShowMainForm():
         ShowAddRecordForm()
     def Srch(): 
         frmMain.destroy()
-        ShowSearchForm()
+        ShowSearchForm()        
+    def NewClass(): 
+        frmMain.destroy()
+        ShowClassesForm() 
+    def NewEntry(): 
+        frmMain.destroy()
+        ShowEntryForm()
             
             
             
@@ -1788,12 +2162,28 @@ def ShowMainForm():
         command= Srch
     )
     
+    btnClass= ttk.Button(
+        frame,
+        image= Classimg,
+        text=' ',
+        command= NewClass
+    )
+
+
+    btnEntry= ttk.Button(
+        frame,
+        image= Entryimg,
+        text=' ',
+        command= NewEntry
+    )
     #Tool tips (when hovering the mouse over the butons a text is showed)
     myTip = Hovertip(btnNewAccount,'Add a new account')
     myTip2 = Hovertip(btnNewStaff,'Add a new member of staff')
     myTip3 = Hovertip(btnNewRecord,'Add a new record')
     myTip4 = Hovertip(btnNewMember,'Add a member')
     myTip5 = Hovertip(btnSearch,'Browse the files')
+    myTip6 = Hovertip(btnEntry,'Enter members into classes')
+    myTip7 = Hovertip(btnClass,'Add a new Class')
 
 
 
@@ -1809,6 +2199,8 @@ def ShowMainForm():
     btnNewRecord.grid(column=4,row=1,pady=2,padx=2)
     btnNewMember.grid(column=5,row=1,pady=2,padx=2)
     btnSearch.grid(column=2,row=2,pady=2,padx=2)
+    btnEntry.grid(column=3,row=2,pady=2,padx=2)
+    btnClass.grid(column=4,row=2,pady=2,padx=2)
 
     #Show the form
     frmMain.mainloop()
